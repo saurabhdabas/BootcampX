@@ -13,16 +13,18 @@ pool.connect((err,res)=>{
 pool.connect().then(
   console.log("You are connected.")
 ).catch(error =>{console.log("error:",error)})
-pool.query(`
+const queryString = `
 SELECT DISTINCT teachers.name as teacher, cohorts.name as cohort, COUNT(assistance_requests.id) AS total_assistances
 FROM teachers
 JOIN assistance_requests ON teacher_id = teachers.id
 JOIN students ON student_id = students.id
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name LIKE '%${process.argv[2]}%'
+WHERE cohorts.name LIKE $1
 GROUP BY teachers.name,cohorts.name
 ORDER BY teacher;
-`)
+`;
+const values = [`%${process.argv[2]}%`];
+pool.query(queryString, values)
 .then(res => {
   console.table(res.rows);
   res.rows.forEach((user)=>{

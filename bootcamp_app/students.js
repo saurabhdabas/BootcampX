@@ -13,13 +13,15 @@ pool.connect((err,res)=>{
 pool.connect().then(
   console.log("You are connected.")
 ).catch(error =>{console.log("error:",error)})
-pool.query(`
+const queryString = `
 SELECT students.id as student_id, students.name as name, cohorts.name as cohort
 FROM students
 JOIN cohorts ON cohorts.id = cohort_id
-WHERE cohorts.name LIKE '%${process.argv[2]}%'
-LIMIT ${process.argv[3]};
-`)
+WHERE cohorts.name LIKE $1
+LIMIT $2;
+`;
+const values = [`%${process.argv[2]}%`,`${process.argv[3]}`|| 5]
+pool.query(queryString, values)
 .then(res => {
   console.table(res.rows);
   res.rows.forEach((user)=>{
